@@ -37,12 +37,14 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Objects\BoolObject.cs" />
     <Compile Include="Objects\FixnumObject.cs" />
     <Compile Include="REPL\Evaluator.cs" />
     <Compile Include="REPL\Reader.cs" />
     <Compile Include="Objects\SObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="REPL\ReaderExceptions.cs" />
+    <Compile Include="REPL\SessionContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

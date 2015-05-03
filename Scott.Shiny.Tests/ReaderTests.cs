@@ -8,6 +8,14 @@ namespace Scott.Shiny.Tests
     [TestClass]
     public class ReaderTests
     {
+        private SessionContext mSessionContext;
+
+        [TestInitialize]
+        public void TestSetUp()
+        {
+            mSessionContext = new SessionContext();
+        }
+
         [TestMethod]
         [TestCategory("Reader/Values")]
         public void ReadValidFixnums()
@@ -59,9 +67,34 @@ namespace Scott.Shiny.Tests
             var result = Read("42x");
         }
 
+        [TestMethod]
+        [TestCategory("Reader/Values")]
+        public void ReadTrueAndFalse()
+        {
+            // Read true, make sure it is right type and equal to singleton.
+            var result = Read("#t");
+            Assert.IsInstanceOfType(result, typeof(TrueBoolObject));
+            Assert.AreSame(mSessionContext.True, result);
+
+            // Read true again, make sure it is still singleton.
+            var secondTrue = Read("#T");
+            Assert.AreSame(result, secondTrue);
+            Assert.AreSame(mSessionContext.True, result);
+
+            // Read false, make sure it is right type and equal to singleton.
+            result = Read("#f");
+            Assert.IsInstanceOfType(result, typeof(FalseBoolObject));
+            Assert.AreSame(mSessionContext.False, result);
+
+            // Read false again, make sure it is still singleton.
+            var secondFalse = Read("#F");
+            Assert.AreSame(result, secondFalse);
+            Assert.AreSame(mSessionContext.False, result);
+        }
+
         private SObject Read(string s)
         {
-            var reader = new Reader(s);
+            var reader = new Reader(s, mSessionContext);
             return reader.Read();
         }
     }

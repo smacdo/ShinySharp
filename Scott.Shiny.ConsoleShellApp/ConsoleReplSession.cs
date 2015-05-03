@@ -48,11 +48,13 @@ namespace Scott.Shiny.ConsoleShellApp
         {
             OnStarted();
 
+            var sessionContext = new SessionContext();
+
             while (true)
             {
                 var userInput = ReadUserInput(DefaultInputPrompt);
-                var parsedExpression = Read(userInput);
-                var result = Evaluate(parsedExpression);
+                var parsedExpression = Read(userInput, sessionContext);
+                var result = Evaluate(parsedExpression, sessionContext);
                 WriteResult(result);
             }
         }
@@ -77,14 +79,14 @@ namespace Scott.Shiny.ConsoleShellApp
         /// </summary>
         /// <param name="input">User input.</param>
         /// <returns>Shiny object containing the user's expression.</returns>
-        private SObject Read(string input)
+        private SObject Read(string input, SessionContext sessionContext)
         {
             if (input == null)
             {
                 throw new ArgumentNullException("input");
             }
 
-            var reader = new Reader(input);
+            var reader = new Reader(input, sessionContext);
             return reader.Read();
         }
 
@@ -93,7 +95,7 @@ namespace Scott.Shiny.ConsoleShellApp
         /// </summary>
         /// <param name="expression">Expression to evaluate.</param>
         /// <returns>Result of evaluating the expression.</returns>
-        private SObject Evaluate(SObject expression)
+        private SObject Evaluate(SObject expression, SessionContext sessionContext)
         {
             if (expression == null)
             {

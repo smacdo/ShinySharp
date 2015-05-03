@@ -93,6 +93,21 @@ namespace Scott.Shiny.REPL
     }
 
     /// <summary>
+    ///  REPL reader could not parse this fixnum value.
+    /// </summary>
+    public class ReaderInvalidBoolTokenException : ReaderInvalidTokenException
+    {
+        public ReaderInvalidBoolTokenException(
+            string lineText,
+            int? lineNumber = null,
+            int? startCol = null,
+            int? endCol = null)
+            : base("Invalid bool encountered", lineText, lineNumber, startCol, endCol)
+        {
+        }
+    }
+
+    /// <summary>
     ///  REPL reader does not support given feature.
     /// </summary>
     public class ReaderNotSupportedException : ReaderException

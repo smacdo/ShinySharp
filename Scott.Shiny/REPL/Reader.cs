@@ -19,21 +19,27 @@ namespace Scott.Shiny.REPL
 
         private readonly char[] mInputText;
         private int mReadPos = 0;
+        private SessionContext mContext;
 
         /// <summary>
         ///  Constructor.
         /// </summary>
         /// <param name="inputText">Shiny code to read.</param>
-        public Reader(string inputText)
+        public Reader(string inputText, SessionContext context)
         {
             if (inputText == null)
             {
                 throw new ArgumentNullException("inputText");
             }
 
-            CommentCharacter = DefaultCommentCharacter;
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
 
+            CommentCharacter = DefaultCommentCharacter;
             mInputText = inputText.ToCharArray();
+            mContext = context;
         }
 
         /// <summary>
@@ -83,6 +89,18 @@ namespace Scott.Shiny.REPL
                 // PARSING: Number.
                 PutBackCharacter();
                 result = ReadNumber();
+            }
+            else if (c == '#')
+            {
+                if (hasNextChar && nextCharacter == '\\')
+                {
+                    // TODO: Implement read character.
+                }
+                else
+                {
+                    // PARSING: Bool.
+                    result = ReadBool();
+                }
             }
 
             return result;
@@ -153,6 +171,43 @@ namespace Scott.Shiny.REPL
                     startCol,
                     CurrentColumn);
             }
+        }
+
+        /// <summary>
+        ///  Read a number from the input stream.
+        /// </summary>
+        /// <remarks>
+        ///  TODO: Check and support overflow (both INT_MAX and INT_MIN).
+        ///  TODO: Suport floating point values.
+        /// </remarks>
+        /// <returns>Number that was read.</returns>
+        private SObject ReadBool()
+        {
+            char c = GetNextCharacter();
+            BoolObject result = null;
+
+            switch (c)
+            {
+                case 'T':
+                case 't':
+                    result = mContext.True;
+                    break;
+
+                case 'F':
+                case 'f':
+                    result = mContext.False;
+                    break;
+
+                default:
+                    throw new ReaderInvalidBoolTokenException(GetCurrentLine());
+            }
+
+            if (!PeekIsNextCharacterDelimiter())
+            {
+                throw new ReaderInvalidBoolTokenException(GetCurrentLine());
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -289,6 +344,22 @@ namespace Scott.Shiny.REPL
 
             CurrentColumn -= 1;
             mReadPos -= 1;
+        }
+
+        /// <summary>
+        ///  Check if the next character is a delimiter.
+        /// </summary>
+        /// <returns></returns>
+        private bool PeekIsNextCharacterDelimiter()
+        {
+            if (HasNextCharacter())
+            {
+                return IsDelimitter(PeekNextCharacter());
+            }
+            else
+            {
+                return true;
+            }
         }
 
         /// <summary>
