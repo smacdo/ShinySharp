@@ -17,18 +17,24 @@ namespace Scott.Shiny.REPL
         /// </summary>
         public SessionContext()
         {
-            True = new TrueBoolObject();
+            EmptyList = new EmptyListObject();
             False = new FalseBoolObject();
+            True = new TrueBoolObject();
         }
 
         /// <summary>
-        ///  Get the true bool singleton.
+        ///  Get the empty list singleton.
         /// </summary>
-        public TrueBoolObject True { get; private set; }
+        public EmptyListObject EmptyList { get; private set; }
 
         /// <summary>
         ///  Get the false bool singleton.
         /// </summary>
         public FalseBoolObject False { get; private set; }
+
+        /// <summary>
+        ///  Get the true bool singleton.
+        /// </summary>
+        public TrueBoolObject True { get; private set; }
     }
 }

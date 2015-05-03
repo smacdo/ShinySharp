@@ -139,8 +139,7 @@ namespace Scott.Shiny.Objects
                 output.Append(" ");
                 cdrPair.Write(output);
             }
-
-            if (mCdr is EmptyListObject)
+            else if (mCdr is EmptyListObject)
             {
                 // Don't need to print anything...
             }

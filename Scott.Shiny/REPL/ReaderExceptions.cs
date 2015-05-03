@@ -62,13 +62,28 @@ namespace Scott.Shiny.REPL
     }
 
     /// <summary>
+    ///  Exception that gets thrown when the reader hits an unexpected character.
+    /// </summary>
+    public class ReaderUnexpectedCharacterException : ReaderException
+    {
+        public ReaderUnexpectedCharacterException(
+            char character,
+            string lineText = null,
+            int? lineNumber = null,
+            int? column = null)
+            : base("Unexpected character", lineText, lineNumber, column, column)
+        {
+        }
+    }
+
+    /// <summary>
     ///  When the REPL reader encounters a token that cnanot be parsed.
     /// </summary>
     public class ReaderInvalidTokenException : ReaderException
     {
         public ReaderInvalidTokenException(
             string message,
-            string lineText,
+            string lineText = null,
             int? lineNumber = null,
             int? startCol = null,
             int? endCol = null)

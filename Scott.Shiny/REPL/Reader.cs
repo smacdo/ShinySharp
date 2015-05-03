@@ -83,7 +83,7 @@ namespace Scott.Shiny.REPL
             char c = GetNextCharacter();
             bool hasNextChar = HasNextCharacter();
             char nextCharacter = (hasNextChar ? PeekNextCharacter() : '\0');
-            
+
             if (Char.IsNumber(c) || ((c == '-' || c == '+') && hasNextChar && Char.IsNumber(nextCharacter)))
             {
                 // PARSING: Number.
@@ -94,7 +94,10 @@ namespace Scott.Shiny.REPL
             {
                 if (hasNextChar && nextCharacter == '\\')
                 {
-                    // TODO: Implement read character.
+                    // PARSING: Character.
+                    // Consume the peeked next character before getting the character token.
+                    GetNextCharacter();
+                    result = ReadCharacter();
                 }
                 else
                 {
@@ -102,8 +105,190 @@ namespace Scott.Shiny.REPL
                     result = ReadBool();
                 }
             }
+            else if (c == '"')
+            {
+                // PARSING: String.
+                result = ReadString();
+            }
+            else if (c == '(')
+            {
+                // PARSING: Pair.
+                result = ReadPair();
+            }
+            else
+            {
+                throw new ReaderUnexpectedCharacterException(c);
+            }
 
+            // Consume extra whitespace that follows this token. This is a little hack that fixes an edge case where
+            // extra whitespace after the last token causes a subsequent read + failure.
+            SkipWhitespace();
+
+            // All done, return the object that was read.
             return result;
+        }
+
+        /// <summary>
+        ///  Read a string token from the input stream.
+        /// </summary>
+        /// <returns>String that was read.</returns>
+        private SObject ReadCharacter()
+        {
+            char c = GetNextCharacter();
+            CharacterObject character = null;
+
+            // Aquire the character token. Most are single letters, but some require special handling.
+            if (HasNextCharacter() && !PeekIsNextCharacterDelimiter())
+            {
+                switch (c)
+                {
+                    case 'n':
+                        ConsumeExpectedCharacters("ewline");
+                        character = new CharacterObject('\n');
+                        break;
+                        
+                    case 's':
+                        ConsumeExpectedCharacters("pace");
+                        character = new CharacterObject(' ');
+                        break;
+
+                    case 't':
+                        ConsumeExpectedCharacters("ab");
+                        character = new CharacterObject('\t');
+                        break;
+
+                    default:
+                        throw new ReaderException("put a better exception here");
+                }
+            }
+            else
+            {
+                character = new CharacterObject(c);
+            }
+
+            if (!PeekIsNextCharacterDelimiter())
+            {
+                throw new ReaderException("put a better exception here");
+            }
+
+            return character;
+        }
+
+        /// <summary>
+        ///  Read a string token from the input stream.
+        /// </summary>
+        /// <returns>String that was read.</returns>
+        private SObject ReadString()
+        {
+            // TODO: This is very unoptimized.
+            bool nextIsEscape = false;
+            bool foundEndOfString = false;
+            var output = new StringBuilder();
+
+            while (HasNextCharacter())
+            {
+                char c = GetNextCharacter();
+
+                if (nextIsEscape)
+                {
+                    switch (c)
+                    {
+                        case '\\':
+                            output.Append('\\');
+                            break;
+
+                        case 'n':
+                            output.AppendLine();
+                            break;
+
+                        case '"':
+                            output.Append('"');
+                            break;
+
+                        default:
+                            throw new ReaderException("Escape not supported");
+                    }
+
+                    nextIsEscape = false;
+                }
+                else if (c == '\\')
+                {
+                    nextIsEscape = true;
+                    continue;
+                }
+                else if (c == '"')
+                {
+                    foundEndOfString = true;
+                    break;
+                }
+                else
+                {
+                    output.Append(c);
+                }
+            }
+
+            if (!foundEndOfString)
+            {
+                throw new ReaderException("Did not find end of string");
+            }
+
+            if (!PeekIsNextCharacterDelimiter())
+            {
+                throw new ReaderException("Missing expected end of token");
+            }
+
+            return new StringObject(output.ToString());
+        }
+
+        /// <summary>
+        ///  Read a pair token from the input stream.
+        /// </summary>
+        /// <returns>Pair that was read.</returns>
+        private SObject ReadPair()
+        {
+            // Consume any extra whitespace.
+            SkipWhitespace();
+
+            // Is this the empty list?
+            if (PeekNextCharacter() == ')')
+            {
+                // Consume the read character and return an empty list.
+                GetNextCharacter();
+                return mContext.EmptyList;
+            }
+
+            // Read the car value. (THe first half of the pair).
+            var car = Read();
+            SkipWhitespace();
+
+            // Read the cdr value. (The second half of the pair).
+            SObject cdr;
+
+            if (PeekNextCharacter() == '.')
+            {
+                // Reading an improper list.
+                GetNextCharacter();     // Eat the improper list separator char.
+
+                if (!PeekIsNextCharacterDelimiter())
+                {
+                    throw new ReaderException("dot not followed by a delim");
+                }
+
+                cdr = Read();
+                SkipWhitespace();
+
+                // TODO: this is fragile
+                if (GetNextCharacter() != ')')
+                {
+                    throw new ReaderException("expected )");
+                }
+            }
+            else
+            {
+                cdr = ReadPair();
+            }
+
+            return new PairObject(car, cdr);
         }
 
         /// <summary>
@@ -283,6 +468,34 @@ namespace Scott.Shiny.REPL
                 // This is not a whitespace character! Put the character back and return to the caller.
                 PutBackCharacter();
                 break;
+            }
+        }
+
+        /// <summary>
+        ///  Advances the input stream by consuming the expected string. If the values do not match an exception will
+        ///  be thrown.
+        /// </summary>
+        /// <param name="expected"></param>
+        private void ConsumeExpectedCharacters(string expected)
+        {
+            int nextIndex = 0;
+            int charsMatched = 0;
+
+            while (HasNextCharacter())
+            {
+                if (expected[nextIndex++] == GetNextCharacter())
+                {
+                    charsMatched++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (charsMatched != expected.Length)
+            {
+                throw new ReaderException("Put something better in here");
             }
         }
 
