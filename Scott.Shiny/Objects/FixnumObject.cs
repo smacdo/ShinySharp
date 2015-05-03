@@ -7,81 +7,18 @@ using System.Threading.Tasks;
 namespace Scott.Shiny.Objects
 {
     /// <summary>
-    ///  Represents a Shiny Fixnum object value.
+    ///  Represents a 32 bit signed integer value.
     /// </summary>
-    public class FixnumObject : SObject, IComparable<FixnumObject>, IEquatable<FixnumObject>
+    public class FixnumObject : TemplatedValueObject<int>
     {
         /// <summary>
-        ///  Fixnum value constructor.
+        ///  Construct a new fixnum value.
         /// </summary>
-        /// <param name="value">Integer value to initialize this fixnum with.</param>
+        /// <param name="value">Integer value to use.</param>
         public FixnumObject(int value)
+            : base(value)
         {
             Value = value;
-        }
-
-        /// <summary>
-        ///  Get or set this fixnum's value.
-        /// </summary>
-        public int Value { get; set; }
-
-        /// <summary>
-        ///  Compare this Fixnum object to another Fixnum object.
-        /// </summary>
-        /// <param name="other">The other fixnum object to compare to.</param>
-        /// <returns>Result of the comparison.</returns>
-        public int CompareTo(FixnumObject other)
-        {
-            if (ReferenceEquals(other, null))
-            {
-                throw new InvalidOperationException("Other instance is null");
-            }
-
-            return Value.CompareTo(other.Value);
-        }
-
-        /// <summary>
-        ///  Compare this Fixnum object to another Fixnum object.
-        /// </summary>
-        /// <param name="other">The other fixnum object to compare to.</param>
-        /// <returns>Result of the comparison.</returns>
-        public int CompareTo(object other)
-        {
-            return CompareTo(other as FixnumObject);
-        }
-
-        /// <summary>
-        ///  Check if this fixnum equals another fixnum.
-        /// </summary>
-        /// <param name="other">The fixnum to check for equality against.</param>
-        /// <returns>True if the fixnums are equal, false otherwise.</returns>
-        public bool Equals(FixnumObject other)
-        {
-            if (ReferenceEquals(other, null))
-            {
-                return false;
-            }
-
-            return ReferenceEquals(this, other) || Value.Equals(other.Value);
-        }
-
-        /// <summary>
-        ///  Check if this fixnum equals another fixnum.
-        /// </summary>
-        /// <param name="other">The fixnum to check for equality against.</param>
-        /// <returns>True if the fixnums are equal, false otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as FixnumObject);
-        }
-
-        /// <summary>
-        ///  Get fixnum hashcode.
-        /// </summary>
-        /// <returns>Hashcode of fixnum.</returns>
-        public override int GetHashCode()
-        {
-            return Value.GetHashCode();
         }
 
         /// <summary>

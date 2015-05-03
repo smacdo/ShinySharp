@@ -38,7 +38,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\BoolObject.cs" />
+    <Compile Include="Objects\CharacterObject.cs" />
+    <Compile Include="Objects\EmptyListObject.cs" />
     <Compile Include="Objects\FixnumObject.cs" />
+    <Compile Include="Objects\PairObject.cs" />
+    <Compile Include="Objects\StringObject.cs" />
     <Compile Include="REPL\Evaluator.cs" />
     <Compile Include="REPL\Reader.cs" />
     <Compile Include="Objects\SObject.cs" />
