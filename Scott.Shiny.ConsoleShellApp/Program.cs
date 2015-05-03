@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Scott.Shiny.ConsoleShellApp
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            var session = new ConsoleReplSession();
+            session.Run();
         }
     }
 }
